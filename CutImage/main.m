@@ -33,9 +33,27 @@ int main(int argc, const char * argv[]) {
             size.height = [representation pixelsHigh];
         }
         
+        NSRect rect = NSMakeRect(0, 0, size.width, size.height);
+        CGImageRef imageRef = [image CGImageForProposedRect:&rect context:NULL hints:nil];
         
+        NSInteger rows = ceil(size.width/titleSize);
+        NSInteger cols = ceil(size.height/titleSize);
         
-        
+        for (int y = 0 ; y < rows; y++) {
+            for (int x = 0; x < cols; x++) {
+                //获得图片切块
+                CGRect titleRect = CGRectMake(x*titleSize, y*titleSize, titleSize, titleSize);
+                CGImageRef titleImage = CGImageCreateWithImageInRect(imageRef, titleRect);
+                
+                //转换为图片数据
+                NSBitmapImageRep *imageRef = [[NSBitmapImageRep alloc] initWithCGImage:titleImage];
+                NSData *data = [imageRef representationUsingType:NSBitmapImageFileTypeJPEG properties:nil];
+                CGImageRelease(titleImage);
+                
+                NSString *path = [outPutPath stringByAppendingFormat:@"_%02i_%02i.jpg",x,y];
+                [data writeToFile:path atomically:NO];
+            }
+        }
     }
     return 0;
 }
